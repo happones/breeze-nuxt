@@ -87,7 +87,7 @@ npm run preview
 
 ### Authentication Composable
 
-This Next.js application contains a custom `useAuth` Vue composable, designed to abstract all authentication logic away from your pages. In addition, the composable can be used to access the currently authenticated user:
+This Nuxt.js application contains a custom `useAuth` Vue composable, designed to abstract all authentication logic away from your pages. In addition, the composable can be used to access the currently authenticated user:
 
 ```vue
 <script setup>

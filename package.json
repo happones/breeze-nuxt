@@ -22,7 +22,10 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.10",
-    "axios": "^1.3.3",
-    "swrv": "^1.0.3"
+    "axios": "^0.21.1",
+    "swr-vue": "^1.9.1"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }

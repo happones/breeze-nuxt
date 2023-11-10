@@ -1,26 +1,17 @@
-import useSWRV from "swrv";
-import { navigateTo, useRoute, useRouter, useRuntimeConfig } from "nuxt/app";
-import Axios from "axios";
+import {useSWR} from "swr-vue";
+import { navigateTo, useRoute, useRouter } from "nuxt/app";
+import {useAxios} from "./axios";
 import { watch } from "vue";
 
-export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
+export function useAuth ({ middleware, redirectIfAuthenticated } = {}) {
     const route = useRoute();
     const router = useRouter();
-
-    const runtimeConfig = useRuntimeConfig();
-    const { backendUrl } = runtimeConfig.public;
-    const axios = Axios.create({
-        baseURL: backendUrl,
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
-        withCredentials: true,
-    });
+    const axios = useAxios();
     const {
         data: user,
         error,
         mutate,
-    } = useSWRV("/api/user", () =>
+    } = useSWR("/api/user", () =>
         axios
             .get("/api/user")
             .then((res) => res.data)
@@ -107,9 +98,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     };
 
     const logout = async () => {
-        console.log(error.value);
+        await csrf()
         if (!error.value) {
-            console.log("peticion");
             await axios.post("/logout").then(() => mutate());
         }
 
@@ -117,7 +107,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     };
 
     watch([user, error], () => {
-        console.log(user.value, error.value, middleware, redirectIfAuthenticated);
         if (middleware === "guest" && redirectIfAuthenticated && user.value) {
             router.push(redirectIfAuthenticated);
         }
@@ -127,7 +116,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         }
 
         if (middleware === "auth" && error.value) {
-            logout();
+            logout().then(data => data);
         }
     });
 
@@ -140,4 +129,4 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         resendEmailVerification,
         logout,
     };
-};
+}
