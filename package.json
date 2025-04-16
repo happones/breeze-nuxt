@@ -1,5 +1,7 @@
 {
+  "name": "nuxt-app",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -7,25 +9,25 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
-  "devDependencies": {
-    "@nuxt/devtools": "latest",
-    "@tailwindcss/forms": "^0.5.3",
-    "@vue/eslint-config-prettier": "^7.1.0",
-    "autoprefixer": "^10.4.13",
-    "eslint": "^8.30.0",
-    "eslint-plugin-vue": "^9.9.0",
-    "nuxt": "^3.8.0",
-    "postcss": "^8.4.21",
-    "prettier": "^2.8.4",
-    "tailwindcss": "^3.2.7",
-    "vue-router": "^4.2.5"
-  },
   "dependencies": {
-    "@headlessui/vue": "^1.7.10",
-    "axios": "^0.21.1",
-    "swr-vue": "^1.9.1"
-  },
-  "engines": {
-    "node": "18.x"
+    "@nuxt/eslint": "^1.3.0",
+    "@nuxt/fonts": "^0.11.1",
+    "@nuxt/image": "^1.10.0",
+    "@nuxt/test-utils": "^3.17.2",
+    "@tailwindcss/vite": "^4.1.4",
+    "@vueuse/core": "^13.1.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "eslint": "^9.24.0",
+    "lucide-vue-next": "^0.488.0",
+    "nuxt": "^3.16.2",
+    "nuxt-auth-sanctum": "^0.6.6",
+    "reka-ui": "^2.2.0",
+    "shadcn-nuxt": "^2.0.1",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss": "^4.1.4",
+    "tw-animate-css": "^1.2.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   }
 }

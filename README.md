@@ -1,110 +1,168 @@
-# Laravel Breeze Nuxt3
+# Laravel Breeze Nuxt3 – v1.0.0
+
+![Nuxt](https://img.shields.io/badge/nuxt%20js-00C58E?style=for-the-badge&logo=nuxtdotjs&logoColor=white
+) ![Shad](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white) ![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+)
 
 ## Introduction
 
-This repository is an implementation of the [Laravel Breeze](https://laravel.com/docs/starter-kits) application / authentication starter kit frontend in [Nuxt3](https://nuxt.com/docs/getting-started/introduction). All of the authentication boilerplate is already written for you - powered by [Laravel Sanctum](https://laravel.com/docs/sanctum), allowing you to quickly begin pairing your beautiful Nuxt3 frontend with a powerful Laravel backend.
+This project is a frontend implementation of [Laravel Breeze](https://laravel.com/docs/starter-kits) using [Nuxt 3](https://nuxt.com). It provides a solid foundation to build fullstack applications with full authentication using [Laravel Sanctum](https://laravel.com/docs/sanctum), already integrated via [nuxt-sanctum](https://github.com/sidebase/nuxt-auth).
 
-## Installation (Backend)
+### Features
+
+- Laravel 12 with Breeze (API stack)
+- Nuxt 3 frontend with TypeScript
+- Authentication via `nuxt-sanctum`
+- Middleware: `sanctum:auth` and `email-verified`
+- Breadcrumb support per page
+- UI built with [shadcn/ui](https://ui.shadcn.com/)
+- Tailwind CSS and clean structure for scaling
+
+---
+
+## Backend Setup (Laravel 12)
 
 ```bash
-# Create the Laravel application...
+# Create the Laravel project
 laravel new nuxt-backend
-# Or with sail
+
+# Or using Laravel Sail
 curl -s https://laravel.build/nuxt-backend | bash
+cd nuxt-backend
 
-cd new nuxt-backend
-
-# Install Breeze and dependencies...
+# Install Breeze API stack
 composer require laravel/breeze --dev
-
 php artisan breeze:install api
-```
 
-Next, ensure that your application's `APP_URL` and `FRONTEND_URL` in `.env` file
+# Run migrations
+php artisan migrate
+```
+Update your .env file:
 
 ```dotenv
-# App url
 APP_URL=http://localhost:8000
-# Or with sail
-APP_URL=http://localhost
-
 FRONTEND_URL=http://localhost:3000
 ```
-
-After defining the appropriate environment variables, you may serve the Laravel application using the `serve` Artisan command:
+Start the Laravel server:
 
 ```bash
-# Serve the application...
 php artisan serve
-# Or with sail
-sail up
+# or if using Sail
+./vendor/bin/sail up
+
 ```
+---
 
-## Setup Frontend
+## Frontend Setup (Nuxt)
 
-Clone this repository and install its dependencies with `yarn install` or `npm install`. Then, copy the `.env.example` file to `.env` and supply the URL of your backend:
+1. Clone this repository.
+2. Install dependencies using your preferred package manager (npm, yarn, or pnpm).
+3. Copy the `.env.example` file to `.env`.
+4. Set the `NUXT_PUBLIC_BACKEND_URL` pointing to your Laravel backend.
+5. Start the Nuxt development server.
 
-```dotenv
-NUXT_PUBLIC_BACKEND_URL=http://localhost:8000
-# Or with sail
-NUXT_PUBLIC_BACKEND_URL=http://localhost
+
 ```
+# Clone this repository
+git clone https://github.com/happones/breeze-nuxt.git
+cd breeze-nuxt
 
-Finally, run the application via `yarn dev` or `npm run dev`. The application will be available at `http://localhost:3000`:
-
-```bash
-# yarn
-yarn install
-
-# npm
+# Install dependencies
 npm install
-
-# pnpm
+# or
+yarn install
+# or
 pnpm install
 ```
 
-## Development Server
+Copy the environment config and set the backend URL:
 
-Start the development server on http://localhost:3000
+```bash
+cp .env.example .env
+```
+
+.env:
+
+```dotenv
+NUXT_PUBLIC_SANCTUM_BASE_URL=http://localhost:8000
+```
+
+Run the dev server:
 
 ```bash
 npm run dev
 ```
 
+---
+
+## Authentication & Middleware
+
+This project uses [`nuxt-sanctum`](https://github.com/sidebase/nuxt-auth) for authentication.
+
+Use the `sanctum:auth` middleware to protect pages for authenticated users.
+
+Use the custom `email-verified` middleware for pages that require email verification.
+
+
+```ts
+definePageMeta({
+  title: "Dashboard",
+  middleware: ["sanctum:auth", "email-verified"],
+});
+
+```
+
+- sanctum:auth: Protects pages for authenticated users only
+
+- email-verified: Custom middleware to ensure user has a verified email
+
+### Example Page Meta with Middleware and Breadcrumbs
+
+```ts
+definePageMeta({
+  title: "Dashboard",
+  middleware: ["sanctum:auth", "email-verified"]
+})
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: "Dashboard", href: "/dashboard" }
+]
+```
+
+## UI Components
+
+The UI is powered by [shadcn/ui](https://ui.shadcn.com/) with Tailwind CSS.
+
+This project uses shadcn/ui for building beautiful and accessible UI components with Tailwind CSS.
+
+All components are tree-shakeable and customizable. You can generate components using:
+
+```bash
+npx shadcn-ui@latest add button
+```
+
+---
+
 ## Production
 
-Build the application for production:
+To prepare for production:
 
-```bash
-npm run build
-```
+- Build the application.
+- Preview the build locally.
+- Deploy to a platform of your choice (Vercel, Netlify, or a custom VPS).
 
-Locally preview production build:
+Refer to the [Nuxt deployment guide](https://nuxt.com/docs/getting-started/deployment) for more information.
 
-```bash
-npm run preview
-```
+---
 
-### Authentication Composable
+## Useful Links
 
-This Nuxt.js application contains a custom `useAuth` Vue composable, designed to abstract all authentication logic away from your pages. In addition, the composable can be used to access the currently authenticated user:
-
-```vue
-<script setup>
-    const { logout, user } = useAuth({ middleware: 'auth' })
-</script>
-
-<template>
-  <p>{{ user?.name }}</p>
-  <button @click="logout">Sign out</button>
-</template>
-```
-
-### Named Routes
-For convenience, [Ziggy](https://github.com/tighten/ziggy#spas-or-separate-repos) may be used to reference your Laravel application's named route URLs from your React application.
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-
+- [Laravel Breeze Documentation](https://laravel.com/docs/starter-kits#breeze)
+- [Laravel Sanctum Documentation](https://laravel.com/docs/sanctum)
+- [Nuxt Documentation](https://nuxt.com/docs)
+- [nuxt-sanctum](https://github.com/sidebase/nuxt-auth)
+- [shadcn/ui](https://ui.shadcn.com)
 
 ## License
-Laravel Breeze Nuxt is open-sourced software licensed under the [MIT license](LICENSE.md).
+
+This project is open-sourced software licensed under the [MIT license](LICENSE.md).

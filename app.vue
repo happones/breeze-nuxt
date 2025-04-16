@@ -1,3 +1,13 @@
+<script setup>
+import { initializeTheme } from './composables/useAppearance';
+
+initializeTheme();
+</script>
+
 <template>
-    <NuxtPage></NuxtPage>
+  <div>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </div>
 </template>

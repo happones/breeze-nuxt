@@ -1,21 +1,14 @@
-<script setup>
-defineProps({
-    messages: {
-        default() {
-            return [];
-        },
-    },
-    className: {
-        type: String,
-        default: "",
-    },
-});
+<script setup lang="ts">
+defineProps<{
+  message?: string | object;
+}>();
 </script>
 
 <template>
-    <div v-show="messages.length > 0">
-        <p v-for="(message, index) in messages" :key="index" class="text-sm text-red-600 dark:text-red-400">
-            {{ message }}
-        </p>
-    </div>
+  <div v-show="message">
+    <template v-if="typeof message === 'object'">
+      <p class="text-sm text-red-500">{{ message[0] }}</p>
+    </template>
+    <p v-else class="text-sm text-red-500">{{ message }}</p>
+  </div>
 </template>

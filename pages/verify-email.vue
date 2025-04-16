@@ -1,54 +1,63 @@
-<script setup>
-import { ref } from "vue";
-import PrimaryButton from "@/components/PrimaryButton.vue";
-import { useAuth } from "@/composables/auth";
+<script setup lang="ts">
+import { Button } from "@/components/ui/button";
 
-const { logout, resendEmailVerification } = useAuth({
-    middleware: "auth",
-    redirectIfAuthenticated: "/dashboard",
+import { LoaderCircle } from "lucide-vue-next";
+
+const { logout, user } = useSanctumAuth();
+const route = useRoute();
+
+watchEffect(async () => {
+  if (user.value?.email_verified_at) {
+    const redirectPath = route.query.redirect?.toString() || "/dashboard";
+    await navigateTo(redirectPath);
+  }
 });
 
-const status = ref(null);
+const client = useSanctumClient();
+
+const status = ref("");
 const processing = ref(false);
 
 const submit = async () => {
-    processing.value = true;
-    await resendEmailVerification({ status });
-    processing.value = false;
+  processing.value = true;
+  try {
+    const data = await client("email/verification-notification", {
+      method: "POST",
+    });
+
+    status.value = data.status;
+  } catch (e) {
+    status.value = e.response._data?.status;
+  }
+  processing.value = false;
 };
+
+definePageMeta({
+  title: "Email verification",
+  middleware: ["sanctum:auth"],
+});
 </script>
 
 <template>
-    <NuxtLayout name="guest-layout">
-        <Head>
-            <Title>Email Verification</Title>
-        </Head>
+  <NuxtLayout
+    name="auth-layout"
+    title="Verify email"
+    description="Please verify your email address by clicking on the link we just emailed to you."
+  >
+    <div
+      v-if="status === 'verification-link-sent'"
+      class="mb-4 text-center text-sm font-medium text-green-600"
+    >
+      A new verification link has been sent to the email address you provided
+      during registration.
+    </div>
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Thanks for signing up! Before getting started, could you verify your email address by clicking on the link
-            we just emailed to you? If you didn't receive the email, we will gladly send you another.
-        </div>
-
-        <div
-            v-if="status === 'verification-link-sent'"
-            class="mb-4 font-medium text-sm text-green-600 dark:text-green-400"
-        >
-            A new verification link has been sent to the email address you provided during registration.
-        </div>
-
-        <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
-                <PrimaryButton :class="{ 'opacity-25': processing }" :disabled="processing">
-                    Resend Verification Email
-                </PrimaryButton>
-
-                <button
-                    class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                    @click="logout"
-                >
-                    Log Out
-                </button>
-            </div>
-        </form> </NuxtLayout
-    >>
+    <form class="space-y-6 text-center" @submit.prevent="submit">
+      <Button :disabled="processing" variant="secondary">
+        <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
+        Resend verification email
+      </Button>
+      <Button variant="link" type="button" @click="logout">Log out</Button>
+    </form>
+  </NuxtLayout>
 </template>

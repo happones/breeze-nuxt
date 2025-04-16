@@ -1,63 +1,92 @@
-<script setup>
+<script setup lang="ts">
 import InputError from "@/components/InputError.vue";
-import InputLabel from "@/components/InputLabel.vue";
-import PrimaryButton from "@/components/PrimaryButton.vue";
-import TextInput from "@/components/TextInput.vue";
-import { ref } from "vue";
-import { useAuth } from "@/composables/auth";
-const email = ref("");
+import TextLink from "@/components/TextLink.vue";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LoaderCircle } from "lucide-vue-next";
+
+const client = useSanctumClient();
+
+const form = ref({
+  email: "",
+});
+
 const errors = ref({});
-const status = ref(null);
+const status = ref("");
 const processing = ref(false);
-const { forgotPassword } = useAuth();
-const submit = async () => {
-    processing.value = true;
-    await forgotPassword({
-        email,
-        errors,
-        status,
-    });
-    processing.value = false;
+
+const resetForm = () => {
+  form.value.email = "";
+  errors.value = {};
 };
+
+const submit = async () => {
+  processing.value = true;
+  errors.value = {};
+  try {
+    const data = await client("/forgot-password", {
+      method: "POST",
+      body: form.value,
+    });
+
+    status.value = data.status;
+    resetForm();
+  } catch (e) {
+    errors.value = e.response._data.errors;
+  }
+  processing.value = false;
+};
+
+definePageMeta({
+  title: "Forgot password",
+  sanctum: {
+    guestOnly: true,
+  },
+});
 </script>
 
 <template>
-    <NuxtLayout name="guest-layout">
-        <Head>
-            <Title>Forgot Password</Title>
-        </Head>
+  <NuxtLayout
+    name="auth-layout"
+    title="Forgot password"
+    description="Enter your email to receive a password reset link"
+  >
+    <div
+      v-if="status"
+      class="mb-4 text-center text-sm font-medium text-green-600"
+    >
+      {{ status }}
+    </div>
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset
-            link that will allow you to choose a new one.
+    <div class="space-y-6">
+      <form @submit.prevent="submit">
+        <div class="grid gap-2">
+          <Label for="email">Email address</Label>
+          <Input
+            id="email"
+            v-model="form.email"
+            type="email"
+            name="email"
+            autocomplete="off"
+            autofocus
+            placeholder="email@example.com"
+          />
+          <InputError :message="errors.email" />
         </div>
 
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-            {{ status }}
+        <div class="my-6 flex items-center justify-start">
+          <Button class="w-full" :disabled="processing">
+            <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
+            Email password reset link
+          </Button>
         </div>
+      </form>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    v-model="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :messages="errors.email" />
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': processing }" :disabled="processing">
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
-        </form>
-    </NuxtLayout>
+      <div class="space-x-1 text-center text-sm text-muted-foreground">
+        <span>Or, return to</span>
+        <TextLink href="/login">log in</TextLink>
+      </div>
+    </div>
+  </NuxtLayout>
 </template>

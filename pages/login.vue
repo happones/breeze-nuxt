@@ -1,96 +1,124 @@
-<script setup>
-import Checkbox from "@/components/Checkbox.vue";
+<script setup lang="ts">
 import InputError from "@/components/InputError.vue";
-import InputLabel from "@/components/InputLabel.vue";
-import PrimaryButton from "@/components/PrimaryButton.vue";
-import TextInput from "@/components/TextInput.vue";
-import { ref } from "vue";
-import { useAuth } from "@/composables/auth";
-import { useRoute } from "nuxt/app";
+import TextLink from "@/components/TextLink.vue";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LoaderCircle } from "lucide-vue-next";
 
+const { login } = useSanctumAuth();
 const route = useRoute();
-const email = ref("");
-const password = ref("");
-const remember = ref(false);
-const errors = ref([]);
-const status = ref(route.query.reset?.length > 0 && errors.value.length === 0 ? atob(route.query.reset) : null);
-const processing = ref(false);
 
-const { login } = useAuth({
-    middleware: "guest",
-    redirectIfAuthenticated: "/dashboard",
+const form = ref({
+  email: "",
+  password: "",
+  remember: false,
 });
 
-const submit = async () => {
-    processing.value = true;
-    await login({
-        email: email.value,
-        password: password.value,
-        remember: remember.value,
-        errors,
-        status,
-    });
-    processing.value = false;
+const errors = ref({});
+const status = ref(route.query.status || "");
+const processing = ref(false);
+
+const resetForm = () => {
+  form.value = {
+    email: "",
+    password: "",
+    remember: false,
+  };
+  errors.value = {};
 };
+
+const submit = async () => {
+  processing.value = true;
+  errors.value = {};
+  try {
+    await login(form.value);
+    resetForm();
+  } catch (e) {
+    errors.value = e.response?._data?.errors;
+  }
+};
+
+definePageMeta({
+  title: "Log in",
+  sanctum: {
+    guestOnly: true,
+  },
+});
 </script>
 
 <template>
-    <NuxtLayout name="guest-layout">
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
+  <NuxtLayout
+    name="auth-layout"
+    title="Log in to your account"
+    description="Enter your email and password below to log in"
+  >
+    <div
+      v-if="status"
+      class="mb-4 text-center text-sm font-medium text-green-600"
+    >
+      {{ status }}
+    </div>
+
+    <form class="flex flex-col gap-6" @submit.prevent="submit">
+      <div class="grid gap-6">
+        <div class="grid gap-2">
+          <Label for="email">Email address</Label>
+          <Input
+            id="email"
+            v-model="form.email"
+            type="email"
+            required
+            autofocus
+            :tabindex="1"
+            autocomplete="email"
+            placeholder="email@example.com"
+          />
+          <InputError :message="errors.email" />
         </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
+        <div class="grid gap-2">
+          <div class="flex items-center justify-between">
+            <Label for="password">Password</Label>
+            <TextLink href="/forgot-password" class="text-sm" :tabindex="5">
+              Forgot password?
+            </TextLink>
+          </div>
+          <Input
+            id="password"
+            v-model="form.password"
+            type="password"
+            required
+            :tabindex="2"
+            autocomplete="current-password"
+            placeholder="Password"
+          />
+          <InputError :message="errors.password" />
+        </div>
 
-                <TextInput
-                    id="email"
-                    v-model="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
+        <div class="flex items-center justify-between" :tabindex="3">
+          <Label for="remember" class="flex items-center space-x-3">
+            <Checkbox id="remember" v-model="form.remember" :tabindex="4" />
+            <span>Remember me</span>
+          </Label>
+        </div>
 
-                <InputError class="mt-2" :messages="errors.email" />
-            </div>
+        <Button
+          type="submit"
+          class="mt-4 w-full"
+          :tabindex="4"
+          :disabled="processing"
+        >
+          <LoaderCircle v-if="processing" class="h-4 w-4 animate-spin" />
+          Log in
+        </Button>
+      </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    v-model="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :messages="errors.password" />
-            </div>
-
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox v-model:checked="remember" name="remember" />
-                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <NuxtLink
-                    to="/forgot-password"
-                    class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                >
-                    Forgot your password?
-                </NuxtLink>
-
-                <PrimaryButton class="ml-4" :class="{ 'opacity-25': processing }" :disabled="processing">
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
-    </NuxtLayout>
+      <div class="text-center text-sm text-muted-foreground">
+        Don't have an account?
+        <TextLink href="register" :tabindex="5">Sign up</TextLink>
+      </div>
+    </form>
+  </NuxtLayout>
 </template>

@@ -1,15 +1,28 @@
+import tailwindcss from "@tailwindcss/vite";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    css: ['~/assets/css/app.css'],
-    runtimeConfig: {
-        public: {
-            backendUrl: process.env.NUXT_PUBLIC_BACKEND_URL,
-        }
+  compatibilityDate: "2024-11-01",
+  devtools: { enabled: true },
+  css: ["~/assets/css/tailwind.css"],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+  modules: [
+    "@nuxt/eslint",
+    "@nuxt/fonts",
+    "@nuxt/image",
+    "@nuxt/test-utils",
+    "nuxt-auth-sanctum",
+    "shadcn-nuxt",
+  ],
+  shadcn: {
+    prefix: "",
+    componentDir: "./components/ui",
+  },
+  sanctum: {
+    redirectIfAuthenticated: true,
+    redirect: {
+      onLogin: "/dashboard",
     },
-    postcss: {
-        plugins: {
-            tailwindcss: {},
-            autoprefixer: {},
-        },
-    },
-})
+  },
+});
