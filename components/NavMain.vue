@@ -12,7 +12,7 @@ defineProps<{
   items: NavItem[];
 }>();
 
-const page = ref({});
+const route = useRoute()
 </script>
 
 <template>
@@ -21,14 +21,14 @@ const page = ref({});
     <SidebarMenu>
       <SidebarMenuItem v-for="item in items" :key="item.title">
         <SidebarMenuButton
-          as-child
-          :is-active="item.href === page.url"
-          :tooltip="item.title"
+            as-child
+            :is-active="item.href === route.path"
+            :tooltip="item.title"
         >
-          <Link :href="item.href">
+          <NuxtLink :to="item.href">
             <component :is="item.icon" />
             <span>{{ item.title }}</span>
-          </Link>
+          </NuxtLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
