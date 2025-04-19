@@ -38,6 +38,7 @@ const submit = async () => {
   } catch (e) {
     errors.value = e.response?._data?.errors;
   }
+  processing.value = false;
 };
 
 definePageMeta({
